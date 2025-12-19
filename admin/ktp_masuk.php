@@ -10,6 +10,12 @@ require_once __DIR__ . '/../config/database.php';
 $success = isset($_GET['success']);
 $result_prr = $conn->query('SELECT * FROM ktp_prr ORDER BY created_at DESC');
 $ktp_prr = $result_prr ? $result_prr->fetch_all(MYSQLI_ASSOC) : [];
+$result_selesai = $conn->query('SELECT nama_pemohon FROM ktp_selesai');
+$selesai_names = $result_selesai ? $result_selesai->fetch_all(MYSQLI_ASSOC) : [];
+$selesai_map = [];
+foreach ($selesai_names as $row) {
+    $selesai_map[$row['nama_pemohon']] = true;
+}
 $conn->close();
 ?>
 <!doctype html>
@@ -23,17 +29,18 @@ $conn->close();
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand" href="dashboard.php">KTP PRR</a>
+        <a class="navbar-brand" href="ktp_masuk.php">KTP PRR</a>
+        <div class="navbar-nav">
+            <a class="nav-link active" aria-current="page" href="ktp_masuk.php">KTP Masuk</a>
+            <a class="nav-link" href="ktp_selesai.php">KTP Selesai</a>
+            <a class="nav-link" href="ktp_pengambilan.php">Pengambilan</a>
+        </div>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="../auth/logout.php">Logout</a>
         </div>
     </div>
 </nav>
 <div class="container py-4">
-    <div class="d-flex gap-2 mb-3">
-        <a class="btn btn-outline-primary btn-sm" href="#form">Form Input</a>
-        <a class="btn btn-outline-secondary btn-sm" href="#data">Data Masuk</a>
-    </div>
     <div class="row g-4">
         <div class="col-lg-5" id="form">
             <div class="card shadow-sm">
@@ -85,7 +92,7 @@ $conn->close();
                                     <?php foreach ($ktp_prr as $row): ?>
                                         <tr>
                                             <td>
-                                                <input class="form-check-input" type="checkbox" name="selected_prr[]" value="<?php echo htmlspecialchars($row['id']); ?>" aria-label="Pilih data">
+                                                <input class="form-check-input" type="checkbox" name="selected_prr[]" value="<?php echo htmlspecialchars($row['id']); ?>" <?php echo isset($selesai_map[$row['nama_pemohon']]) ? 'checked' : ''; ?> aria-label="Pilih data">
                                             </td>
                                             <td><?php echo htmlspecialchars($row['nama_pemohon']); ?></td>
                                             <td><?php echo htmlspecialchars($row['keterangan']); ?></td>
