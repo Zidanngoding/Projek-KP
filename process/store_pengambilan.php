@@ -66,16 +66,18 @@ try {
         throw new Exception('Gagal mengambil data KTP: ' . $stmt->error);
     }
 
-    $result = $stmt->get_result();
-    $ktp = $result ? $result->fetch_assoc() : null;
-    $stmt->close();
-
-    if (!$ktp) {
+    $stmt->store_result();
+    if ($stmt->num_rows === 0) {
+        $stmt->close();
         throw new Exception('Data KTP tidak ditemukan atau belum siap diambil.');
     }
 
+    $stmt->bind_result($nama_pemohon, $kecamatan);
+    $stmt->fetch();
+    $stmt->close();
+
     $stmt = $conn->prepare('INSERT INTO ktp_pengambilan (nama_pemohon, kecamatan, foto_bukti, keterangan) VALUES (?, ?, ?, ?)');
-    $stmt->bind_param('ssss', $ktp['nama_pemohon'], $ktp['kecamatan'], $filename, $keterangan_text);
+    $stmt->bind_param('ssss', $nama_pemohon, $kecamatan, $filename, $keterangan_text);
 
     if (!$stmt->execute()) {
         throw new Exception('Gagal menyimpan data pengambilan: ' . $stmt->error);

@@ -13,14 +13,15 @@ if ($username === '' || $password === '') {
 $stmt = $conn->prepare('SELECT id, password, role FROM users WHERE username = ?');
 $stmt->bind_param('s', $username);
 $stmt->execute();
-$result = $stmt->get_result();
+$stmt->store_result();
 
-if ($result->num_rows === 1) {
-    $user = $result->fetch_assoc();
-    if (password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
+if ($stmt->num_rows === 1) {
+    $stmt->bind_result($user_id, $password_hash, $role);
+    $stmt->fetch();
+    if (password_verify($password, $password_hash)) {
+        $_SESSION['user_id'] = $user_id;
         $_SESSION['username'] = $username;
-        $_SESSION['role'] = $user['role'];
+        $_SESSION['role'] = $role;
         header('Location: ../admin/dashboard.php');
         exit;
     }

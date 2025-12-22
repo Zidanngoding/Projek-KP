@@ -20,9 +20,9 @@ if ($password !== $confirm_password) {
 $stmt = $conn->prepare('SELECT id FROM users WHERE username = ?');
 $stmt->bind_param('s', $username);
 $stmt->execute();
-$result = $stmt->get_result();
+$stmt->store_result();
 
-if ($result->num_rows > 0) {
+if ($stmt->num_rows > 0) {
     $stmt->close();
     $conn->close();
     header('Location: register.php?error=1');
