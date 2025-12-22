@@ -2,15 +2,16 @@
 require_once __DIR__ . '/../config/database.php';
 
 $nama = trim($_POST['nama_pemohon'] ?? '');
-$keterangan = trim($_POST['keterangan'] ?? 'Masuk PRR');
-$status = $_POST['status'] ?? 'Diproses';
+$kecamatan = trim($_POST['kecamatan'] ?? '');
+$keterangan = trim($_POST['keterangan'] ?? '');
+$status = 'Diproses';
 
-if ($nama === '' || $keterangan === '') {
-    die('Nama pemohon dan keterangan wajib diisi.');
+if ($nama === '' || $kecamatan === '' || $keterangan === '') {
+    die('Nama pemohon, kecamatan, dan keterangan wajib diisi.');
 }
 
-$stmt = $conn->prepare('INSERT INTO ktp_prr (nama_pemohon, keterangan, status) VALUES (?, ?, ?)');
-$stmt->bind_param('sss', $nama, $keterangan, $status);
+$stmt = $conn->prepare('INSERT INTO ktp_prr (nama_pemohon, kecamatan, keterangan, status) VALUES (?, ?, ?, ?)');
+$stmt->bind_param('ssss', $nama, $kecamatan, $keterangan, $status);
 
 if (!$stmt->execute()) {
     die('Gagal menyimpan data: ' . $stmt->error);

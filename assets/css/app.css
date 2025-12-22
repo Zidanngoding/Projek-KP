@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --app-primary: #1f4aa8;
+    --app-primary-dark: #163c86;
+    --app-accent: #2a7ae4;
+    --app-bg: #f3f6fb;
+    --app-card: #ffffff;
+    --app-text: #1b2430;
+    --app-muted: #5f6b7a;
+    --app-border: #e4e9f4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--app-bg);
+    color: var(--app-text);
+}
+
+.app-navbar {
+    background: var(--app-primary);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+}
+
+.app-navbar .navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.app-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.55rem 0.9rem;
+    border-radius: 0.65rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.app-navbar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.app-navbar .nav-link.active {
+    background: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-weight: 700;
+}
+
+.text-muted {
+    color: var(--app-muted) !important;
+}
+
+.card {
+    border: 1px solid var(--app-border);
+    border-radius: 18px;
+    background: var(--app-card);
+}
+
+.card-shadow {
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.form-control,
+.form-select {
+    border-radius: 12px;
+    border-color: var(--app-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 0.2rem rgba(42, 122, 228, 0.18);
+}
+
+.btn {
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: var(--app-primary);
+    border-color: var(--app-primary);
+}
+
+.btn-primary:hover {
+    background: var(--app-primary-dark);
+    border-color: var(--app-primary-dark);
+}
+
+.btn-success,
+.btn-warning,
+.btn-secondary {
+    font-weight: 600;
+}
+
+.table thead th {
+    background: #eef3ff;
+    color: #243352;
+    border-bottom: 0;
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.85rem 0.75rem;
+}
+
+.table tbody tr:hover {
+    background: #f7f9ff;
+}
+
+.badge-soft {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.auth-card {
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
+
+.auth-title {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
