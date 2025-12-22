@@ -1,4 +1,5 @@
-﻿<?php
+<?php
+ob_start();
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../auth/login.php');
@@ -163,17 +164,17 @@ $conn->close();
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Nama Pemohon</label>
                                                                         <input type="text" name="nama_pemohon" class="form-control" value="<?php echo htmlspecialchars($row['nama_pemohon']); ?>" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Kecamatan</label>
-                                                                    <select name="kecamatan" class="form-select" required>
-                                                                        <?php foreach ($kecamatan_options as $kecamatan_option): ?>
-                                                                            <option value="<?php echo htmlspecialchars($kecamatan_option); ?>" <?php echo $row['kecamatan'] === $kecamatan_option ? 'selected' : ''; ?>>
-                                                                                <?php echo htmlspecialchars($kecamatan_option); ?>
-                                                                            </option>
-                                                                        <?php endforeach; ?>
-                                                                    </select>
-                                                                </div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">Kecamatan</label>
+                                                                        <select name="kecamatan" class="form-select" required>
+                                                                            <?php foreach ($kecamatan_options as $kecamatan_option): ?>
+                                                                                <option value="<?php echo htmlspecialchars($kecamatan_option); ?>" <?php echo $row['kecamatan'] === $kecamatan_option ? 'selected' : ''; ?>>
+                                                                                    <?php echo htmlspecialchars($kecamatan_option); ?>
+                                                                                </option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                    </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Keterangan</label>
                                                                         <input type="text" name="keterangan" class="form-control" value="<?php echo htmlspecialchars($row['keterangan']); ?>" required>

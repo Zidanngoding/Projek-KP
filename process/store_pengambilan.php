@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../config/database.php';
 
 $ktp_prr_id = (int)($_POST['ktp_prr_id'] ?? 0);

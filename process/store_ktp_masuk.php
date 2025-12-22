@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../config/database.php';
 
 $nama = trim($_POST['nama_pemohon'] ?? '');
