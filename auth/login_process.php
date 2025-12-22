@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require_once __DIR__ . '/../config/database.php';
 
@@ -33,3 +34,4 @@ $conn->close();
 header('Location: login.php?error=1');
 exit;
 ?>
+

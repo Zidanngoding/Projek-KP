@@ -1,7 +1,14 @@
 <?php
-session_start();
+ob_start();
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../auth/login.php');
+    if (!headers_sent()) {
+        header('Location: ../auth/login.php');
+        exit;
+    }
+    echo "<script>window.location.href='../auth/login.php';</script>";
     exit;
 }
 
@@ -81,3 +88,4 @@ $conn->close();
 </div>
 </body>
 </html>
+
