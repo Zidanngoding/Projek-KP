@@ -118,6 +118,16 @@ body {
     background: #f7f9ff;
 }
 
+.ktp-table th,
+.ktp-table td {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.ktp-actions {
+    min-width: 140px;
+}
+
 .badge-soft {
     background: #eef2ff;
     color: #3730a3;

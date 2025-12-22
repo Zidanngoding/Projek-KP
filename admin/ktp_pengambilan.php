@@ -8,8 +8,8 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/../config/database.php';
 
 $success = isset($_GET['success']);
-$result_pengambilan = $conn->query('SELECT * FROM ktp_pengambilan ORDER BY tanggal_ambil DESC');
-$ktp_pengambilan = $result_pengambilan ? $result_pengambilan->fetch_all(MYSQLI_ASSOC) : [];
+$result_siap = $conn->query("SELECT id, nama_pemohon, kecamatan, keterangan, created_at FROM ktp_prr WHERE status = 'Selesai' ORDER BY created_at DESC");
+$ktp_siap = $result_siap ? $result_siap->fetch_all(MYSQLI_ASSOC) : [];
 $conn->close();
 ?>
 <!doctype html>
@@ -28,6 +28,7 @@ $conn->close();
         <div class="navbar-nav flex-row align-items-center gap-1">
             <a class="nav-link" href="ktp_masuk.php">KTP Masuk</a>
             <a class="nav-link active" aria-current="page" href="ktp_pengambilan.php">Pengambilan</a>
+            <a class="nav-link" href="ktp_selesai.php">KTP Selesai</a>
         </div>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="../auth/logout.php">Logout</a>
@@ -47,22 +48,43 @@ $conn->close();
                     <?php if ($success): ?>
                         <div class="alert alert-success">Bukti pengambilan berhasil disimpan.</div>
                     <?php endif; ?>
+                    <?php if (empty($ktp_siap)): ?>
+                        <div class="alert alert-info">Belum ada KTP yang siap diambil.</div>
+                    <?php endif; ?>
                     <form method="post" action="../process/store_pengambilan.php" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label class="form-label">Nama Pemohon</label>
-                            <input type="text" name="nama_pemohon" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kecamatan</label>
-                            <input type="text" name="kecamatan" class="form-control" required>
+                            <select name="ktp_prr_id" id="ktp_prr_id" class="form-select" required <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
+                                <option value="" selected>Pilih pemohon</option>
+                                <?php foreach ($ktp_siap as $row): ?>
+                                    <option value="<?php echo htmlspecialchars($row['id']); ?>">
+                                        <?php echo htmlspecialchars($row['nama_pemohon']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Foto Bukti (JPG/PNG)</label>
-                            <input type="file" name="foto" class="form-control" accept=".jpg,.jpeg,.png" required>
+                            <input type="file" name="foto" class="form-control" accept="image/*" capture="environment" required <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary w-100" id="openCameraBtn" <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
+                                Buka Kamera
+                            </button>
+                        </div>
+                        <div id="cameraWrap" class="d-none">
+                            <div class="mb-2">
+                                <video id="cameraVideo" class="w-100 rounded" playsinline autoplay muted></video>
+                                <canvas id="cameraCanvas" class="w-100 rounded d-none"></canvas>
+                            </div>
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="button" class="btn btn-success w-100" id="captureBtn">Ambil Foto</button>
+                                <button type="button" class="btn btn-secondary w-100" id="closeCameraBtn">Tutup Kamera</button>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Keterangan</label>
-                            <select name="keterangan" id="keterangan" class="form-select" required>
+                            <select name="keterangan" id="keterangan" class="form-select" required <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
                                 <option value="" selected>Pilih keterangan</option>
                                 <option value="Diambil sendiri">Diambil sendiri</option>
                                 <option value="Diwakilkan">Diwakilkan</option>
@@ -84,7 +106,7 @@ $conn->close();
                                 <input type="text" name="telp_pengambil" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-primary" <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>Simpan</button>
                         <a href="dashboard.php" class="btn btn-secondary">Kembali</a>
                     </form>
                 </div>
@@ -93,37 +115,27 @@ $conn->close();
         <div class="col-lg-7" id="data">
             <div class="card card-shadow">
                 <div class="card-body">
-                    <h2 class="h5 mb-3">Data Pengambilan</h2>
-                    <?php if (empty($ktp_pengambilan)): ?>
-                        <div class="alert alert-info">Belum ada data pengambilan.</div>
+                    <h2 class="h5 mb-3">Data KTP Siap Diambil</h2>
+                    <?php if (empty($ktp_siap)): ?>
+                        <div class="alert alert-info">Belum ada KTP siap diambil.</div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-striped table-hover align-middle">
                                 <thead>
                                     <tr>
-                                        <th scope="col">
-                                            <input class="form-check-input" type="checkbox" aria-label="Pilih semua">
-                                        </th>
                                         <th>Nama Pemohon</th>
                                         <th>Kecamatan</th>
-                                        <th>Foto Bukti</th>
                                         <th>Keterangan</th>
-                                        <th>Tanggal Ambil</th>
+                                        <th>Tanggal Masuk</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($ktp_pengambilan as $row): ?>
+                                    <?php foreach ($ktp_siap as $row): ?>
                                         <tr>
-                                            <td>
-                                                <input class="form-check-input" type="checkbox" name="selected_pengambilan[]" value="<?php echo htmlspecialchars($row['id']); ?>" checked aria-label="Pilih data">
-                                            </td>
                                             <td><?php echo htmlspecialchars($row['nama_pemohon']); ?></td>
                                             <td><?php echo htmlspecialchars($row['kecamatan']); ?></td>
-                                            <td>
-                                                <img src="../uploads/bukti_pengambilan/<?php echo htmlspecialchars($row['foto_bukti']); ?>" width="90" alt="Bukti">
-                                            </td>
                                             <td><?php echo htmlspecialchars($row['keterangan']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['tanggal_ambil']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['created_at']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -136,9 +148,18 @@ $conn->close();
     </div>
 </div>
 <script>
+    const ktpSelect = document.getElementById('ktp_prr_id');
     const keteranganSelect = document.getElementById('keterangan');
     const selfFields = document.getElementById('selfFields');
     const wakilFields = document.getElementById('wakilFields');
+    const fileInput = document.querySelector('input[name="foto"]');
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const closeCameraBtn = document.getElementById('closeCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const cameraWrap = document.getElementById('cameraWrap');
+    const cameraVideo = document.getElementById('cameraVideo');
+    const cameraCanvas = document.getElementById('cameraCanvas');
+    let cameraStream = null;
 
     function toggleWakilFields() {
         const isSelf = keteranganSelect.value === 'Diambil sendiri';
@@ -160,6 +181,73 @@ $conn->close();
 
     keteranganSelect.addEventListener('change', toggleWakilFields);
     toggleWakilFields();
+
+    if (ktpSelect) {
+        ktpSelect.addEventListener('change', toggleWakilFields);
+    }
+
+    async function openCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Kamera tidak didukung di perangkat ini.');
+            return;
+        }
+
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            cameraVideo.srcObject = cameraStream;
+            cameraWrap.classList.remove('d-none');
+            cameraCanvas.classList.add('d-none');
+        } catch (error) {
+            alert('Tidak bisa mengakses kamera. Pastikan izin kamera diaktifkan.');
+        }
+    }
+
+    function closeCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach((track) => track.stop());
+            cameraStream = null;
+        }
+        cameraVideo.srcObject = null;
+        cameraWrap.classList.add('d-none');
+    }
+
+    function capturePhoto() {
+        if (!cameraStream) {
+            return;
+        }
+
+        const videoWidth = cameraVideo.videoWidth || 1280;
+        const videoHeight = cameraVideo.videoHeight || 720;
+        cameraCanvas.width = videoWidth;
+        cameraCanvas.height = videoHeight;
+
+        const ctx = cameraCanvas.getContext('2d');
+        ctx.drawImage(cameraVideo, 0, 0, videoWidth, videoHeight);
+
+        cameraCanvas.classList.remove('d-none');
+
+        cameraCanvas.toBlob((blob) => {
+            if (!blob) {
+                alert('Gagal mengambil foto.');
+                return;
+            }
+            const file = new File([blob], 'bukti_pengambilan.jpg', { type: 'image/jpeg' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            closeCamera();
+        }, 'image/jpeg', 0.9);
+    }
+
+    if (openCameraBtn) {
+        openCameraBtn.addEventListener('click', openCamera);
+    }
+    if (closeCameraBtn) {
+        closeCameraBtn.addEventListener('click', closeCamera);
+    }
+    if (captureBtn) {
+        captureBtn.addEventListener('click', capturePhoto);
+    }
 </script>
 </body>
 </html>

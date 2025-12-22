@@ -10,6 +10,28 @@ require_once __DIR__ . '/../config/database.php';
 $success = isset($_GET['success']);
 $updated = isset($_GET['updated']);
 $deleted = isset($_GET['deleted']);
+$marked = isset($_GET['marked']);
+$kecamatan_options = [
+    'Bumi Waras',
+    'Enggal',
+    'Kedamaian',
+    'Kedaton',
+    'Kemiling',
+    'Labuhan Ratu',
+    'Langkapura',
+    'Rajabasa',
+    'Sukabumi',
+    'Sukarame',
+    'Tanjung Karang Barat',
+    'Tanjung Karang Pusat',
+    'Tanjung Karang Timur',
+    'Tanjung Senang',
+    'Teluk Betung Barat',
+    'Teluk Betung Selatan',
+    'Teluk Betung Timur',
+    'Teluk Betung Utara',
+    'Way Halim',
+];
 $result_prr = $conn->query('SELECT * FROM ktp_prr ORDER BY created_at DESC');
 $ktp_prr = $result_prr ? $result_prr->fetch_all(MYSQLI_ASSOC) : [];
 $conn->close();
@@ -30,6 +52,7 @@ $conn->close();
         <div class="navbar-nav flex-row align-items-center gap-1">
             <a class="nav-link active" aria-current="page" href="ktp_masuk.php">KTP Masuk</a>
             <a class="nav-link" href="ktp_pengambilan.php">Pengambilan</a>
+            <a class="nav-link" href="ktp_selesai.php">KTP Selesai</a>
         </div>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="../auth/logout.php">Logout</a>
@@ -55,6 +78,9 @@ $conn->close();
                     <?php if ($deleted): ?>
                         <div class="alert alert-success">Data berhasil dihapus.</div>
                     <?php endif; ?>
+                    <?php if ($marked): ?>
+                        <div class="alert alert-success">Status berhasil diperbarui.</div>
+                    <?php endif; ?>
                     <form method="post" action="../process/store_ktp_masuk.php">
                         <div class="mb-3">
                             <label class="form-label">Nama Pemohon</label>
@@ -62,7 +88,14 @@ $conn->close();
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Kecamatan</label>
-                            <input type="text" name="kecamatan" class="form-control" required>
+                            <select name="kecamatan" class="form-select" required>
+                                <option value="" selected>Pilih kecamatan</option>
+                                <?php foreach ($kecamatan_options as $kecamatan_option): ?>
+                                    <option value="<?php echo htmlspecialchars($kecamatan_option); ?>">
+                                        <?php echo htmlspecialchars($kecamatan_option); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Keterangan</label>
@@ -82,37 +115,39 @@ $conn->close();
                         <div class="alert alert-info">Belum ada data KTP masuk.</div>
                     <?php else: ?>
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover align-middle">
+                            <table class="table table-striped table-hover align-middle ktp-table">
                                 <thead>
                                     <tr>
-                                        <th scope="col">
-                                            <input class="form-check-input" type="checkbox" aria-label="Pilih semua">
-                                        </th>
                                         <th>Nama Pemohon</th>
                                         <th>Kecamatan</th>
                                         <th>Keterangan</th>
                                         <th>Tanggal</th>
+                                        <th>Status</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($ktp_prr as $row): ?>
                                         <tr>
-                                            <td>
-                                                <input class="form-check-input" type="checkbox" name="selected_prr[]" value="<?php echo htmlspecialchars($row['id']); ?>" aria-label="Pilih data">
-                                            </td>
                                             <td><?php echo htmlspecialchars($row['nama_pemohon']); ?></td>
                                             <td><?php echo htmlspecialchars($row['kecamatan']); ?></td>
                                             <td><?php echo htmlspecialchars($row['keterangan']); ?></td>
                                             <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['status']); ?></td>
                                             <td>
-                                                <div class="d-flex gap-2">
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal-<?php echo htmlspecialchars($row['id']); ?>">
+                                                <div class="d-flex flex-column gap-2 ktp-actions">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#editModal-<?php echo htmlspecialchars($row['id']); ?>">
                                                         Edit
                                                     </button>
+                                                    <?php if ($row['status'] !== 'Selesai' && $row['status'] !== 'Diambil'): ?>
+                                                        <form method="post" action="../process/mark_ktp_selesai.php">
+                                                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($row['id']); ?>">
+                                                            <button type="submit" class="btn btn-sm btn-outline-success w-100">Tandai Selesai</button>
+                                                        </form>
+                                                    <?php endif; ?>
                                                     <form method="post" action="../process/delete_ktp_masuk.php" onsubmit="return confirm('Hapus data ini?');">
                                                         <input type="hidden" name="id" value="<?php echo htmlspecialchars($row['id']); ?>">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">Hapus</button>
                                                     </form>
                                                 </div>
                                                 <div class="modal fade" id="editModal-<?php echo htmlspecialchars($row['id']); ?>" tabindex="-1" aria-hidden="true">
@@ -128,11 +163,17 @@ $conn->close();
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Nama Pemohon</label>
                                                                         <input type="text" name="nama_pemohon" class="form-control" value="<?php echo htmlspecialchars($row['nama_pemohon']); ?>" required>
-                                                                    </div>
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Kecamatan</label>
-                                                                        <input type="text" name="kecamatan" class="form-control" value="<?php echo htmlspecialchars($row['kecamatan']); ?>" required>
-                                                                    </div>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Kecamatan</label>
+                                                                    <select name="kecamatan" class="form-select" required>
+                                                                        <?php foreach ($kecamatan_options as $kecamatan_option): ?>
+                                                                            <option value="<?php echo htmlspecialchars($kecamatan_option); ?>" <?php echo $row['kecamatan'] === $kecamatan_option ? 'selected' : ''; ?>>
+                                                                                <?php echo htmlspecialchars($kecamatan_option); ?>
+                                                                            </option>
+                                                                        <?php endforeach; ?>
+                                                                    </select>
+                                                                </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Keterangan</label>
                                                                         <input type="text" name="keterangan" class="form-control" value="<?php echo htmlspecialchars($row['keterangan']); ?>" required>

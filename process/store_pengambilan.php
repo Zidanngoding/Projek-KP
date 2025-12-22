@@ -1,14 +1,13 @@
 ﻿<?php
 require_once __DIR__ . '/../config/database.php';
 
-$nama = trim($_POST['nama_pemohon'] ?? '');
-$kecamatan = trim($_POST['kecamatan'] ?? '');
+$ktp_prr_id = (int)($_POST['ktp_prr_id'] ?? 0);
 $keterangan = trim($_POST['keterangan'] ?? '');
 $nama_pengambil = trim($_POST['nama_pengambil'] ?? '');
 $telp_pengambil = trim($_POST['telp_pengambil'] ?? '');
 $telp_pemohon = trim($_POST['telp_pemohon'] ?? '');
 
-if ($nama === '' || $kecamatan === '' || $keterangan === '') {
+if ($ktp_prr_id <= 0 || $keterangan === '') {
     die('Semua field wajib diisi.');
 }
 
@@ -60,8 +59,23 @@ if (!move_uploaded_file($_FILES['foto']['tmp_name'], $targetPath)) {
 $conn->begin_transaction();
 
 try {
+    $stmt = $conn->prepare("SELECT nama_pemohon, kecamatan FROM ktp_prr WHERE id = ? AND status = 'Selesai'");
+    $stmt->bind_param('i', $ktp_prr_id);
+
+    if (!$stmt->execute()) {
+        throw new Exception('Gagal mengambil data KTP: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    $ktp = $result ? $result->fetch_assoc() : null;
+    $stmt->close();
+
+    if (!$ktp) {
+        throw new Exception('Data KTP tidak ditemukan atau belum siap diambil.');
+    }
+
     $stmt = $conn->prepare('INSERT INTO ktp_pengambilan (nama_pemohon, kecamatan, foto_bukti, keterangan) VALUES (?, ?, ?, ?)');
-    $stmt->bind_param('ssss', $nama, $kecamatan, $filename, $keterangan_text);
+    $stmt->bind_param('ssss', $ktp['nama_pemohon'], $ktp['kecamatan'], $filename, $keterangan_text);
 
     if (!$stmt->execute()) {
         throw new Exception('Gagal menyimpan data pengambilan: ' . $stmt->error);
@@ -69,8 +83,8 @@ try {
 
     $stmt->close();
 
-    $stmt = $conn->prepare("UPDATE ktp_prr SET status = 'Diambil' WHERE nama_pemohon = ?");
-    $stmt->bind_param('s', $nama);
+    $stmt = $conn->prepare("UPDATE ktp_prr SET status = 'Diambil' WHERE id = ?");
+    $stmt->bind_param('i', $ktp_prr_id);
 
     if (!$stmt->execute()) {
         throw new Exception('Gagal update status: ' . $stmt->error);
