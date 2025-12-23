@@ -140,7 +140,7 @@ $conn->close();
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Foto Bukti (JPG/PNG)</label>
-                            <input type="file" name="foto" class="form-control" accept="image/*" capture="environment" required <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
+                            <input type="file" name="foto" class="form-control" accept="image/*" required <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
                         </div>
                         <div class="mb-3">
                             <button type="button" class="btn btn-outline-primary w-100" id="openCameraBtn" <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
@@ -155,6 +155,30 @@ $conn->close();
                             <div class="d-flex gap-2 mb-3">
                                 <button type="button" class="btn btn-success w-100" id="captureBtn">Ambil Foto</button>
                                 <button type="button" class="btn btn-secondary w-100" id="closeCameraBtn">Tutup Kamera</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Keterangan Pengambilan</label>
+                            <select name="keterangan" id="keterangan" class="form-select" required <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>
+                                <option value="" selected>Pilih keterangan</option>
+                                <option value="Diambil sendiri">Diambil sendiri</option>
+                                <option value="Diwakilkan">Diwakilkan</option>
+                            </select>
+                        </div>
+                        <div id="selfFields" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Nomor Telepon Pemohon</label>
+                                <input type="text" name="telp_pemohon" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
+                            </div>
+                        </div>
+                        <div id="wakilFields" class="d-none">
+                            <div class="mb-3">
+                                <label class="form-label">Nama Pengambil</label>
+                                <input type="text" name="nama_pengambil" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nomor Telepon Pengambil</label>
+                                <input type="text" name="telp_pengambil" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" <?php echo empty($ktp_siap) ? 'disabled' : ''; ?>>Simpan</button>
@@ -224,6 +248,10 @@ $conn->close();
     </div>
 </div>
 <script>
+    const ktpSelect = document.getElementById('ktp_prr_id');
+    const keteranganSelect = document.getElementById('keterangan');
+    const selfFields = document.getElementById('selfFields');
+    const wakilFields = document.getElementById('wakilFields');
     const fileInput = document.querySelector('input[name="foto"]');
     const openCameraBtn = document.getElementById('openCameraBtn');
     const closeCameraBtn = document.getElementById('closeCameraBtn');
@@ -232,6 +260,32 @@ $conn->close();
     const cameraVideo = document.getElementById('cameraVideo');
     const cameraCanvas = document.getElementById('cameraCanvas');
     let cameraStream = null;
+
+    function toggleWakilFields() {
+        const isSelf = keteranganSelect.value === 'Diambil sendiri';
+        const isWakil = keteranganSelect.value === 'Diwakilkan';
+
+        selfFields.classList.toggle('d-none', !isSelf);
+        wakilFields.classList.toggle('d-none', !isWakil);
+
+        const selfInputs = selfFields.querySelectorAll('input');
+        selfInputs.forEach((input) => {
+            input.required = isSelf;
+        });
+
+        const wakilInputs = wakilFields.querySelectorAll('input');
+        wakilInputs.forEach((input) => {
+            input.required = isWakil;
+        });
+    }
+
+    keteranganSelect.addEventListener('change', toggleWakilFields);
+    toggleWakilFields();
+
+    if (ktpSelect) {
+        ktpSelect.addEventListener('change', toggleWakilFields);
+    }
+
 
 
     async function openCamera() {

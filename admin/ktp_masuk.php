@@ -161,30 +161,6 @@ $conn->close();
                                 <option value="Perubahan">Perubahan</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Keterangan Pengambilan</label>
-                            <select name="keterangan_pengambilan" class="form-select keterangan-pengambilan">
-                                <option value="" selected>Pilih keterangan pengambilan</option>
-                                <option value="Diambil sendiri">Diambil sendiri</option>
-                                <option value="Diwakilkan">Diwakilkan</option>
-                            </select>
-                        </div>
-                        <div class="pengambilan-self d-none">
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Telepon Pemohon</label>
-                                <input type="text" name="telp_pemohon" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
-                            </div>
-                        </div>
-                        <div class="pengambilan-wakil d-none">
-                            <div class="mb-3">
-                                <label class="form-label">Nama Pengambil</label>
-                                <input type="text" name="nama_pengambil" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Telepon Pengambil</label>
-                                <input type="text" name="telp_pengambil" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
-                            </div>
-                        </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="dashboard.php" class="btn btn-secondary">Kembali</a>
                     </form>
@@ -261,20 +237,6 @@ $conn->close();
                                                 </div>
                                                 <?php
                                                     $keterangan_value = $row['keterangan'];
-                                                    $keterangan_pengambilan_value = $row['keterangan_pengambilan'] ?? '';
-                                                    $keterangan_pengambilan_type = '';
-                                                    $telp_pemohon_value = '';
-                                                    $nama_pengambil_value = '';
-                                                    $telp_pengambil_value = '';
-
-                                                    if (preg_match('/^Diambil sendiri(?: \(Telp: (.+)\))?$/', $keterangan_pengambilan_value, $matches)) {
-                                                        $keterangan_pengambilan_type = 'Diambil sendiri';
-                                                        $telp_pemohon_value = $matches[1] ?? '';
-                                                    } elseif (preg_match('/^Diwakilkan(?: \(Nama: (.+), Telp: (.+)\))?$/', $keterangan_pengambilan_value, $matches)) {
-                                                        $keterangan_pengambilan_type = 'Diwakilkan';
-                                                        $nama_pengambil_value = $matches[1] ?? '';
-                                                        $telp_pengambil_value = $matches[2] ?? '';
-                                                    }
                                                 ?>
                                                 <div class="modal fade" id="editModal-<?php echo htmlspecialchars($row['id']); ?>" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog">
@@ -310,30 +272,6 @@ $conn->close();
                                                                             <option value="Perubahan" <?php echo $keterangan_value === 'Perubahan' ? 'selected' : ''; ?>>Perubahan</option>
                                                                         </select>
                                                                     </div>
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Keterangan Pengambilan</label>
-                                                                        <select name="keterangan_pengambilan" class="form-select keterangan-pengambilan">
-                                                                            <option value="" <?php echo $keterangan_pengambilan_type === '' ? 'selected' : ''; ?>>Pilih keterangan pengambilan</option>
-                                                                            <option value="Diambil sendiri" <?php echo $keterangan_pengambilan_type === 'Diambil sendiri' ? 'selected' : ''; ?>>Diambil sendiri</option>
-                                                                            <option value="Diwakilkan" <?php echo $keterangan_pengambilan_type === 'Diwakilkan' ? 'selected' : ''; ?>>Diwakilkan</option>
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="pengambilan-self d-none">
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">Nomor Telepon Pemohon</label>
-                                                                            <input type="text" name="telp_pemohon" class="form-control" value="<?php echo htmlspecialchars($telp_pemohon_value); ?>" placeholder="Contoh: 08xxxxxxxxxx">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="pengambilan-wakil d-none">
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">Nama Pengambil</label>
-                                                                            <input type="text" name="nama_pengambil" class="form-control" value="<?php echo htmlspecialchars($nama_pengambil_value); ?>">
-                                                                        </div>
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">Nomor Telepon Pengambil</label>
-                                                                            <input type="text" name="telp_pengambil" class="form-control" value="<?php echo htmlspecialchars($telp_pengambil_value); ?>" placeholder="Contoh: 08xxxxxxxxxx">
-                                                                        </div>
-                                                                    </div>
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -356,36 +294,5 @@ $conn->close();
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const pengambilanForms = document.querySelectorAll('.keterangan-form');
-    pengambilanForms.forEach((form) => {
-        const pengambilanSelect = form.querySelector('.keterangan-pengambilan');
-        const selfFields = form.querySelector('.pengambilan-self');
-        const wakilFields = form.querySelector('.pengambilan-wakil');
-
-        if (!pengambilanSelect || !selfFields || !wakilFields) {
-            return;
-        }
-
-        const toggleFields = () => {
-            const isSelf = pengambilanSelect.value === 'Diambil sendiri';
-            const isWakil = pengambilanSelect.value === 'Diwakilkan';
-
-            selfFields.classList.toggle('d-none', !isSelf);
-            wakilFields.classList.toggle('d-none', !isWakil);
-
-            selfFields.querySelectorAll('input').forEach((input) => {
-                input.required = isSelf;
-            });
-
-            wakilFields.querySelectorAll('input').forEach((input) => {
-                input.required = isWakil;
-            });
-        };
-
-        pengambilanSelect.addEventListener('change', toggleFields);
-        toggleFields();
-    });
-</script>
 </body>
 </html>
