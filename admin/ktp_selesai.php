@@ -95,6 +95,20 @@ $conn->close();
     <title>KTP Selesai</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/css/app.css" rel="stylesheet">
+    <style>
+        @media print {
+            .navbar, .btn, .page-header {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none;
+                border: none;
+            }
+            body {
+                background: #fff;
+            }
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">
@@ -119,7 +133,10 @@ $conn->close();
         <div class="col-12">
             <div class="card card-shadow">
                 <div class="card-body">
-                    <h2 class="h5 mb-3">Data Pengambilan</h2>
+                    <h2 class="h5 mb-3 d-flex justify-content-between align-items-center">
+                        <span>Data Pengambilan</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">Cetak PDF</button>
+                    </h2>
                     <form method="get" class="row g-2 align-items-end mb-3">
                         <div class="col-12 col-md-4">
                             <label class="form-label">Cari Nama Pemohon</label>
