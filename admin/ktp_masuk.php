@@ -153,27 +153,13 @@ $conn->close();
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Keterangan</label>
-                            <select name="keterangan" class="form-select keterangan-select" required>
+                            <select name="keterangan" class="form-select" required>
                                 <option value="" selected>Pilih keterangan</option>
-                                <option value="Diambil sendiri">Diambil sendiri</option>
-                                <option value="Diwakilkan">Diwakilkan</option>
+                                <option value="PRR">PRR</option>
+                                <option value="Hilang">Hilang</option>
+                                <option value="Rusak">Rusak</option>
+                                <option value="Perubahan">Perubahan</option>
                             </select>
-                        </div>
-                        <div class="self-fields d-none">
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Telepon Pemohon</label>
-                                <input type="text" name="telp_pemohon" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
-                            </div>
-                        </div>
-                        <div class="wakil-fields d-none">
-                            <div class="mb-3">
-                                <label class="form-label">Nama Pengambil</label>
-                                <input type="text" name="nama_pengambil" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Telepon Pengambil</label>
-                                <input type="text" name="telp_pengambil" class="form-control" placeholder="Contoh: 08xxxxxxxxxx">
-                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="dashboard.php" class="btn btn-secondary">Kembali</a>
@@ -251,19 +237,6 @@ $conn->close();
                                                 </div>
                                                 <?php
                                                     $keterangan_value = $row['keterangan'];
-                                                    $keterangan_type = '';
-                                                    $telp_pemohon_value = '';
-                                                    $nama_pengambil_value = '';
-                                                    $telp_pengambil_value = '';
-
-                                                    if (preg_match('/^Diambil sendiri(?: \(Telp: (.+)\))?$/', $keterangan_value, $matches)) {
-                                                        $keterangan_type = 'Diambil sendiri';
-                                                        $telp_pemohon_value = $matches[1] ?? '';
-                                                    } elseif (preg_match('/^Diwakilkan(?: \(Nama: (.+), Telp: (.+)\))?$/', $keterangan_value, $matches)) {
-                                                        $keterangan_type = 'Diwakilkan';
-                                                        $nama_pengambil_value = $matches[1] ?? '';
-                                                        $telp_pengambil_value = $matches[2] ?? '';
-                                                    }
                                                 ?>
                                                 <div class="modal fade" id="editModal-<?php echo htmlspecialchars($row['id']); ?>" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog">
@@ -291,27 +264,13 @@ $conn->close();
                                                                     </div>
                                                                     <div class="mb-3">
                                                                         <label class="form-label">Keterangan</label>
-                                                                        <select name="keterangan" class="form-select keterangan-select" required>
-                                                                            <option value="" <?php echo $keterangan_type === '' ? 'selected' : ''; ?>>Pilih keterangan</option>
-                                                                            <option value="Diambil sendiri" <?php echo $keterangan_type === 'Diambil sendiri' ? 'selected' : ''; ?>>Diambil sendiri</option>
-                                                                            <option value="Diwakilkan" <?php echo $keterangan_type === 'Diwakilkan' ? 'selected' : ''; ?>>Diwakilkan</option>
+                                                                        <select name="keterangan" class="form-select" required>
+                                                                            <option value="" <?php echo $keterangan_value === '' ? 'selected' : ''; ?>>Pilih keterangan</option>
+                                                                            <option value="PRR" <?php echo $keterangan_value === 'PRR' ? 'selected' : ''; ?>>PRR</option>
+                                                                            <option value="Hilang" <?php echo $keterangan_value === 'Hilang' ? 'selected' : ''; ?>>Hilang</option>
+                                                                            <option value="Rusak" <?php echo $keterangan_value === 'Rusak' ? 'selected' : ''; ?>>Rusak</option>
+                                                                            <option value="Perubahan" <?php echo $keterangan_value === 'Perubahan' ? 'selected' : ''; ?>>Perubahan</option>
                                                                         </select>
-                                                                    </div>
-                                                                    <div class="self-fields d-none">
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">Nomor Telepon Pemohon</label>
-                                                                            <input type="text" name="telp_pemohon" class="form-control" value="<?php echo htmlspecialchars($telp_pemohon_value); ?>" placeholder="Contoh: 08xxxxxxxxxx">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="wakil-fields d-none">
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">Nama Pengambil</label>
-                                                                            <input type="text" name="nama_pengambil" class="form-control" value="<?php echo htmlspecialchars($nama_pengambil_value); ?>">
-                                                                        </div>
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">Nomor Telepon Pengambil</label>
-                                                                            <input type="text" name="telp_pengambil" class="form-control" value="<?php echo htmlspecialchars($telp_pengambil_value); ?>" placeholder="Contoh: 08xxxxxxxxxx">
-                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">
@@ -335,36 +294,5 @@ $conn->close();
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const keteranganForms = document.querySelectorAll('.keterangan-form');
-    keteranganForms.forEach((form) => {
-        const keteranganSelect = form.querySelector('.keterangan-select');
-        const selfFields = form.querySelector('.self-fields');
-        const wakilFields = form.querySelector('.wakil-fields');
-
-        if (!keteranganSelect || !selfFields || !wakilFields) {
-            return;
-        }
-
-        const toggleFields = () => {
-            const isSelf = keteranganSelect.value === 'Diambil sendiri';
-            const isWakil = keteranganSelect.value === 'Diwakilkan';
-
-            selfFields.classList.toggle('d-none', !isSelf);
-            wakilFields.classList.toggle('d-none', !isWakil);
-
-            selfFields.querySelectorAll('input').forEach((input) => {
-                input.required = isSelf;
-            });
-
-            wakilFields.querySelectorAll('input').forEach((input) => {
-                input.required = isWakil;
-            });
-        };
-
-        keteranganSelect.addEventListener('change', toggleFields);
-        toggleFields();
-    });
-</script>
 </body>
 </html>
