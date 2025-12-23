@@ -39,8 +39,62 @@ $kecamatan_options = [
     'Teluk Betung Utara',
     'Way Halim',
 ];
-$result_prr = $conn->query('SELECT * FROM ktp_prr ORDER BY created_at DESC');
+$search = trim($_GET['search'] ?? '');
+$filter_kecamatan = trim($_GET['kecamatan'] ?? '');
+$tanggal_mulai = trim($_GET['tanggal_mulai'] ?? '');
+$tanggal_sampai = trim($_GET['tanggal_sampai'] ?? '');
+
+$query = 'SELECT * FROM ktp_prr';
+$conditions = [];
+$params = [];
+$types = '';
+
+if ($search !== '') {
+    $conditions[] = 'nama_pemohon LIKE ?';
+    $params[] = '%' . $search . '%';
+    $types .= 's';
+}
+
+if ($filter_kecamatan !== '') {
+    $conditions[] = 'kecamatan = ?';
+    $params[] = $filter_kecamatan;
+    $types .= 's';
+}
+
+if ($tanggal_mulai !== '') {
+    $conditions[] = 'DATE(created_at) >= ?';
+    $params[] = $tanggal_mulai;
+    $types .= 's';
+}
+
+if ($tanggal_sampai !== '') {
+    $conditions[] = 'DATE(created_at) <= ?';
+    $params[] = $tanggal_sampai;
+    $types .= 's';
+}
+
+if ($conditions) {
+    $query .= ' WHERE ' . implode(' AND ', $conditions);
+}
+
+$query .= ' ORDER BY created_at DESC';
+
+$stmt = $conn->prepare($query);
+if (!$stmt) {
+    die('Gagal memuat data: ' . $conn->error);
+}
+
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+if (!$stmt->execute()) {
+    die('Gagal memuat data: ' . $stmt->error);
+}
+
+$result_prr = $stmt->get_result();
 $ktp_prr = $result_prr ? $result_prr->fetch_all(MYSQLI_ASSOC) : [];
+$stmt->close();
 $conn->close();
 ?>
 <!doctype html>
@@ -138,6 +192,35 @@ $conn->close();
             <div class="card card-shadow">
                 <div class="card-body">
                     <h2 class="h5 mb-3">Data KTP PRR</h2>
+                    <form method="get" class="row g-2 align-items-end mb-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Cari Nama Pemohon</label>
+                            <input type="text" name="search" class="form-control" value="<?php echo htmlspecialchars($search); ?>" placeholder="Contoh: Andi">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Tanggal Mulai</label>
+                            <input type="date" name="tanggal_mulai" class="form-control" value="<?php echo htmlspecialchars($tanggal_mulai); ?>">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Tanggal Sampai</label>
+                            <input type="date" name="tanggal_sampai" class="form-control" value="<?php echo htmlspecialchars($tanggal_sampai); ?>">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label">Daerah</label>
+                            <select name="kecamatan" class="form-select">
+                                <option value="">Semua</option>
+                                <?php foreach ($kecamatan_options as $kecamatan_option): ?>
+                                    <option value="<?php echo htmlspecialchars($kecamatan_option); ?>" <?php echo $filter_kecamatan === $kecamatan_option ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($kecamatan_option); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary">Cari</button>
+                            <a href="ktp_masuk.php" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
                     <?php if (empty($ktp_prr)): ?>
                         <div class="alert alert-info">Belum ada data KTP masuk.</div>
                     <?php else: ?>
