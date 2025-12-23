@@ -150,3 +150,50 @@ body {
     font-weight: 700;
     letter-spacing: 0.3px;
 }
+
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .page-header {
+        margin-bottom: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.35rem;
+    }
+
+    .app-navbar .navbar-nav {
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .app-navbar .nav-link {
+        padding: 0.45rem 0.7rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .form-control,
+    .form-select,
+    .btn {
+        min-height: 44px;
+    }
+
+    .table > :not(caption) > * > * {
+        padding: 0.65rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .ktp-actions {
+        min-width: auto;
+    }
+}
