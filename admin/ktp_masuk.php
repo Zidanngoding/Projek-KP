@@ -41,8 +41,7 @@ $kecamatan_options = [
 ];
 $search = trim($_GET['search'] ?? '');
 $filter_kecamatan = trim($_GET['kecamatan'] ?? '');
-$tanggal_mulai = trim($_GET['tanggal_mulai'] ?? '');
-$tanggal_sampai = trim($_GET['tanggal_sampai'] ?? '');
+$tanggal = trim($_GET['tanggal'] ?? '');
 
 $query = 'SELECT * FROM ktp_prr';
 $conditions = [];
@@ -61,15 +60,9 @@ if ($filter_kecamatan !== '') {
     $types .= 's';
 }
 
-if ($tanggal_mulai !== '') {
-    $conditions[] = 'DATE(created_at) >= ?';
-    $params[] = $tanggal_mulai;
-    $types .= 's';
-}
-
-if ($tanggal_sampai !== '') {
-    $conditions[] = 'DATE(created_at) <= ?';
-    $params[] = $tanggal_sampai;
+if ($tanggal !== '') {
+    $conditions[] = 'DATE(created_at) = ?';
+    $params[] = $tanggal;
     $types .= 's';
 }
 
@@ -198,12 +191,8 @@ $conn->close();
                             <input type="text" name="search" class="form-control" value="<?php echo htmlspecialchars($search); ?>" placeholder="Contoh: Andi">
                         </div>
                         <div class="col-6 col-md-3">
-                            <label class="form-label">Tanggal Mulai</label>
-                            <input type="date" name="tanggal_mulai" class="form-control" value="<?php echo htmlspecialchars($tanggal_mulai); ?>">
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Tanggal Sampai</label>
-                            <input type="date" name="tanggal_sampai" class="form-control" value="<?php echo htmlspecialchars($tanggal_sampai); ?>">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" name="tanggal" class="form-control" value="<?php echo htmlspecialchars($tanggal); ?>">
                         </div>
                         <div class="col-12 col-md-2">
                             <label class="form-label">Daerah</label>
