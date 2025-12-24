@@ -161,6 +161,14 @@ $conn->close();
                                 <option value="Perubahan">Perubahan</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Keterangan Pengambilan</label>
+                            <select name="keterangan_pengambilan" class="form-select" required>
+                                <option value="" selected>Pilih keterangan pengambilan</option>
+                                <option value="Diambil sendiri">Diambil sendiri</option>
+                                <option value="Diwakilkan">Diwakilkan</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                         <a href="dashboard.php" class="btn btn-secondary">Kembali</a>
                     </form>
@@ -206,6 +214,7 @@ $conn->close();
                                         <th>Nama Pemohon</th>
                                         <th>Kecamatan</th>
                                         <th>Keterangan</th>
+                                        <th>Keterangan Pengambilan</th>
                                         <th>Tanggal</th>
                                         <th>Status</th>
                                         <th>Aksi</th>
@@ -217,6 +226,7 @@ $conn->close();
                                             <td><?php echo htmlspecialchars($row['nama_pemohon']); ?></td>
                                             <td><?php echo htmlspecialchars($row['kecamatan']); ?></td>
                                             <td><?php echo htmlspecialchars($row['keterangan']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['keterangan_pengambilan'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($row['created_at']); ?></td>
                                             <td><?php echo htmlspecialchars($row['status']); ?></td>
                                             <td>
@@ -237,6 +247,7 @@ $conn->close();
                                                 </div>
                                                 <?php
                                                     $keterangan_value = $row['keterangan'];
+                                                    $keterangan_pengambilan_value = $row['keterangan_pengambilan'] ?? '';
                                                 ?>
                                                 <div class="modal fade" id="editModal-<?php echo htmlspecialchars($row['id']); ?>" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog">
@@ -270,6 +281,14 @@ $conn->close();
                                                                             <option value="Hilang" <?php echo $keterangan_value === 'Hilang' ? 'selected' : ''; ?>>Hilang</option>
                                                                             <option value="Rusak" <?php echo $keterangan_value === 'Rusak' ? 'selected' : ''; ?>>Rusak</option>
                                                                             <option value="Perubahan" <?php echo $keterangan_value === 'Perubahan' ? 'selected' : ''; ?>>Perubahan</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label">Keterangan Pengambilan</label>
+                                                                        <select name="keterangan_pengambilan" class="form-select" required>
+                                                                            <option value="" <?php echo $keterangan_pengambilan_value === '' ? 'selected' : ''; ?>>Pilih keterangan pengambilan</option>
+                                                                            <option value="Diambil sendiri" <?php echo $keterangan_pengambilan_value === 'Diambil sendiri' ? 'selected' : ''; ?>>Diambil sendiri</option>
+                                                                            <option value="Diwakilkan" <?php echo $keterangan_pengambilan_value === 'Diwakilkan' ? 'selected' : ''; ?>>Diwakilkan</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
